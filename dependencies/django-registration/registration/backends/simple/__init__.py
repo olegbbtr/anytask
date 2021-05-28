@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 from registration import signals
 from registration.forms import RegistrationForm
+from registration.backends.default_with_names import BootStrapRegistrationFormWithNames, RegistrationFormWithNames
 
 
 class SimpleBackend(object):
@@ -21,7 +22,13 @@ class SimpleBackend(object):
         
         """
         username, email, password = kwargs['username'], kwargs['email'], kwargs['password1']
-        User.objects.create_user(username, email, password)
+        first_name, last_name = kwargs['first_name'], kwargs['last_name']
+        user = User.objects.create_user(username, email, password)
+
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+
         
         # authenticate() always has to be called before login(), and
         # will return the user we just created.
@@ -51,7 +58,7 @@ class SimpleBackend(object):
         return getattr(settings, 'REGISTRATION_OPEN', True)
 
     def get_form_class(self, request):
-        return RegistrationForm
+        return RegistrationFormWithNames
 
     def post_registration_redirect(self, request, user):
         """
